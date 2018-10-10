@@ -1,14 +1,7 @@
 import { ICategoryRepository } from "../../interfaces/repositories/icategory-repository";
 import { Category } from "../../model/category";
+import { Guid } from "guid-typescript";
+import { BaseRepository } from "../../../../sharedkernel/src/infrastructure/base-repository";
 
-export class CategoryRepository implements ICategoryRepository {
-
-    cats: Array<Category> = [
-        new Category("Clothes"),
-        new Category("Electronics", "Electronics devices")
-    ];
-
-    getAll(): Array<Category> {
-        return this.cats;
-    }
+export class CategoryRepository extends BaseRepository<Category, Guid> implements ICategoryRepository {
 }
