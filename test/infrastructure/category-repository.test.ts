@@ -4,6 +4,7 @@ import { CategoryRepository } from "../../src/infrastructure/category-repository
 import { createConnection } from "typeorm";
 import * as fs from "fs";
 import * as faker from "faker";
+import { TestProduct } from "../../../sharedkernel/test/core/model/test-product";
 
 describe("CategoryRepository", () => {
     const dbPath: string = "test/uza-inventory-test.sqlite3";
@@ -24,7 +25,14 @@ describe("CategoryRepository", () => {
             entities: ["./src/core/model/*.ts"],
             synchronize: true
         });
-        repository = new CategoryRepository(connection);
+        repository = new CategoryRepository(Category, connection);
+
+        await repository.createBatch(
+            [
+                new Category(faker.commerce.product()),
+                new Category(faker.commerce.product())
+            ]
+        );
     });
 
     test("should create Category", async () => {
@@ -41,6 +49,12 @@ describe("CategoryRepository", () => {
             ]
         );
         expect(categories.length === 2);
+        categories.forEach((c: Category) => console.log(`${c}`));
+    });
+
+    test("should read Categories", async () => {
+        const categories = await repository.getAll();
+        expect(categories.length > 0);
         categories.forEach((c: Category) => console.log(`${c}`));
     });
 });

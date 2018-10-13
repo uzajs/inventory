@@ -4,8 +4,4 @@ import { RepositoryBase } from "../../../sharedkernel/src/infrastructure/reposit
 import { Connection } from "typeorm";
 
 export class CategoryRepository extends RepositoryBase<Category> implements ICategoryRepository {
-
-    constructor(connection: Connection) {
-        super(connection);
-    }
 }
