@@ -1,33 +1,46 @@
-import { CategoryRepository } from "../../src/infrastructure/repository/category-repository";
-import { Category } from "../../src/model/category";
+import { Category } from "../../src/core/model/category";
+import { ICategoryRepository } from "../../src/core/interfaces/icategory-repository";
+import { CategoryRepository } from "../../src/infrastructure/category-repository";
+import { createConnection } from "typeorm";
+import * as fs from "fs";
+import * as faker from "faker";
 
 describe("CategoryRepository", () => {
-    const rep = new CategoryRepository();
-    const catTest = new Category("Test");
-    rep.create(catTest);
-
-    it("should find Category", () => {
-        const cat = rep.get(catTest.id);
-        expect(cat).not.toBeNull();
-        console.log(`${cat}`);
+    const dbPath: string = "test/uza-inventory-test.sqlite3";
+    let repository: ICategoryRepository;
+    beforeAll(async () => {
+        fs.unlink(dbPath, (err) => {
+                if (err) {
+                    console.log(err);
+                    throw err;
+                }
+                console.log("db deleted !");
+            }
+        );
+        const connection = await createConnection({
+            logging: true,
+            type: "sqlite",
+            database: dbPath,
+            entities: ["./src/core/model/*.ts"],
+            synchronize: true
+        });
+        repository = new CategoryRepository(connection);
     });
 
-    it("should load Category list", () => {
-        const cats = rep.getAll();
-        expect(cats.length > 0);
-        cats.forEach(x => console.log(`${x}`));
+    test("should create Category", async () => {
+        const category = await repository.create(new Category(faker.commerce.product()));
+        expect(category).not.toBeUndefined();
+        console.log(`${category}`);
     });
 
-    it("should add Category", () => {
-        rep.create(new Category( "Another Test"));
-        const cats = rep.getAll();
-        expect(cats.length === 2);
-        cats.forEach(x => console.log(`${x}`));
-    });
-
-    it("should remove Category", () => {
-        rep.remove(catTest.id);
-        const deletedcat = rep.get(catTest.id);
-        expect(deletedcat).toBeUndefined();
+    test("should create batch Categories", async () => {
+        const categories = await repository.createBatch(
+            [
+                new Category(faker.commerce.product()),
+                new Category(faker.commerce.product())
+            ]
+        );
+        expect(categories.length === 2);
+        categories.forEach((c: Category) => console.log(`${c}`));
     });
 });

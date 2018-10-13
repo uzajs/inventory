@@ -1,4 +1,4 @@
-import { Category } from "../../src/model/category";
+import { Category } from "../../../src/core/model/category";
 
 describe("Category", () => {
     it("should have description", () => {
